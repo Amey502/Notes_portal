@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ team.team_name }}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe, #a18cd1);
+        }
+
+        .nav-left a,
+        .nav-right a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 3;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+        }
+
+        .create-post {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+        }
+
+        .post-box {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        button {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        a:visited {
+            color: inherit;
+        }
+    </style>
+</head>
+
+<body>
+
+  
+    <div class="navbar">
+        <div class="nav-left">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'profile' %}">Profile</a>
+        </div>
+
+        <div class="nav-center">
+            <form method="GET" style="display:flex; align-items:center; gap:8px;">
+
+                <input type="text" name="search" placeholder="Search by title or user" value="{{ request.GET.search }}"
+                    style="
+                padding:8px 14px;
+                border-radius:20px;
+                border:none;
+                outline:none;
+                width:260px;
+                background:white;
+                color:black;
+            ">
+
+                <button type="submit" style="
+            border:none;
+            padding:8px 12px;
+            border-radius:50%;
+            cursor:pointer;
+            background:white;
+        ">
+                    🔍
+                </button>
+
+            </form>
+        </div>
+
+        <div class="nav-right">
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+
+
+    <div class="container">
+        <div class="main-layout">
+
+
+            <div class="left-panel">
+
+                <h2>{{ team.team_name }}</h2>
+
+                {% if not is_member %}
+                <a href="{% url 'join_team' team.team_id %}">
+                    <button>Join Team</button>
+                </a>
+                {% endif %}
+
+                {% if is_member %}
+                <div class="create-post" onclick="openForm()">
+                    + Create Post
+                </div>
+                {% endif %}
+
+                {% if is_member %}
+
+                {% for post in posts %}
+
+
+                {% if post in matched_posts %}
+                <div class="post-box" id="post-{{ post.post_id }}"
+                    style="border:2px solid #4facfe; box-shadow:0 0 10px #4facfe;">
+                    {% else %}
+                    <div class="post-box" id="post-{{ post.post_id }}">
+                        {% endif %}
+
+                        <b>{{ post.title }}</b><br>
+                        <small>by {{ post.user.username }}</small><br>
+
+                        {% if post.content %}
+                        <p>{{ post.content }}</p>
+                        {% endif %}
+
+
+                        <a href="#"
+                            onclick="toggleLike('{{ post.post_id }}', '{% url 'toggle_like' post.post_id %}'); return false;"
+                            style="color:#ff4d6d; font-weight:bold;">
+
+                            ❤️ <span id="like-count-{{ post.post_id }}">{{ post.likes.count }}</span> Likes
+                        </a>
+
+
+                        <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
+
+                            {% if post.pdf %}
+                            <a href="{{ post.pdf.url }}" target="_blank" style="
+        padding:6px 12px;
+        background:#4facfe;
+        border-radius:6px;
+        color:white;
+        font-weight:bold;
+   ">
+                                📄 View PDF
+                            </a>
+
+                            <a href="{{ post.pdf.url }}" download style="
+        padding:6px 12px;
+        background:#6c757d;
+        border-radius:6px;
+        color:white;
+        font-weight:bold;
+   ">
+                                ⬇ Download
+                            </a>
+                            {% endif %}
+
+                            {% if post.user == user %}
+                            <a href="{% url 'edit_post' post.post_id %}">
+                                <button style="background:#4facfe;">Edit</button>
+                            </a>
+
+                            <a href="{% url 'delete_post' post.post_id %}">
+                                <button style="background:#ff4d4d;">Delete</button>
+                            </a>
+                            {% endif %}
+
+                        </div>
+
+
+                        <div style="margin-top:10px;">
+                            {% for comment in post.comments.all %}
+                            <p><b>{{ comment.user.username }}</b>: {{ comment.text }}</p>
+                            {% endfor %}
+                        </div>
+
+
+                        <form method="POST" action="{% url 'add_comment' post.post_id %}">
+                            {% csrf_token %}
+                            <input type="text" name="text" placeholder="Add comment..." required>
+                            <button type="submit" style="
+        background: linear-gradient(135deg, #4facfe, #a18cd1);
+        padding:6px 12px;
+        border-radius:6px;
+        color:white;
+        border:none;
+    ">
+                                Post
+                            </button>
+                        </form>
+
+                    </div>
+
+                    {% endfor %}
+
+                    {% else %}
+                    <p>Join team to view posts</p>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="right-panel">
+                    <h3>Members</h3>
+                    <hr>
+                    {% for m in members %}
+                    <p>{{ m.username }}</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+
+        <div id="overlay" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    z-index:999;
+"></div>
+
+        <!-- POPUP BOX -->
+        <div id="popupForm" style="
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    background:#1e293b;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 0 20px rgba(0,0,0,0.6);
+    z-index:1000;
+    width:320px;
+">
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <input type="text" name="title" placeholder="Title" required
+                    style="width:100%; padding:10px; border-radius:6px; border:none;"><br><br>
+
+                <textarea name="content" placeholder="Content"
+                    style="width:100%; padding:10px; border-radius:6px; border:none;"></textarea><br><br>
+
+                <input type="file" name="pdf"><br><br>
+
+                <div style="display:flex; justify-content:space-between;">
+
+                    <button type="submit" style="
+                background: linear-gradient(135deg, #4facfe, #00f2fe);
+                color: white;
+                padding:8px 14px;
+                border:none;
+                border-radius:8px;
+                font-weight:bold;
+                cursor:pointer;
+            ">
+                        Post
+                    </button>
+
+                    <button type="button" onclick="closeForm()" style="
+                background:#6c757d;
+                color:white;
+                padding:8px 14px;
+                border:none;
+                border-radius:8px;
+                cursor:pointer;
+            ">
+                        Cancel
+                    </button>
+
+                </div>
+            </form>
+
+        </div>
+
+
+        <script>
+            function openForm() {
+                document.getElementById("popupForm").style.display = "block";
+                document.getElementById("overlay").style.display = "block";
+            }
+
+            function closeForm() {
+                document.getElementById("popupForm").style.display = "none";
+                document.getElementById("overlay").style.display = "none";
+            }
+
+            function toggleLike(postId, url) {
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`like-count-${postId}`).innerText = data.likes;
+                    });
+            }
+        </script>
+
+        {% if matched_posts %}
+        <script>
+            window.onload = function () {
+                const firstMatch = document.getElementById("post-{{ matched_posts.0.post_id }}");
+                if (firstMatch) {
+                    firstMatch.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                }
+            };
+        </script>
+        {% endif %}
+
+</body>
+
+</html>

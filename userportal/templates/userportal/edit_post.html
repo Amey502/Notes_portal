@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Post</title>
+</head>
+
+<body style="font-family: Arial; background:#0f172a; color:white; padding:30px;">
+
+    <h2>Edit Post</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <input type="text" name="title" value="{{ post.title }}" required
+            style="width:300px; padding:8px;"><br><br>
+
+        <textarea name="content" style="width:300px; height:100px;">{{ post.content }}</textarea><br><br>
+
+        <input type="file" name="pdf"><br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+</body>
+
+</html>

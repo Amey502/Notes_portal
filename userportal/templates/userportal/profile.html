@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Profile</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe, #a18cd1);
+        }
+
+        .nav-left a,
+        .nav-right a {
+            margin-right: 15px;
+            text-decoration: none;
+            font-weight: bold;
+            color: white;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 20px;
+        }
+
+        .posts-section {
+            flex: 3;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.05);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .teams-section {
+            flex: 1;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .post-box {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .team-card {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .post-box:hover,
+        .team-card:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="nav-left">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'profile' %}">Profile</a>
+        </div>
+
+        <div class="nav-right">
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <h2>{{ user.username }}'s Profile</h2>
+
+        <div class="main-layout">
+
+          
+            <div class="posts-section">
+                <h3>Your Posts</h3>
+
+                {% for post in posts %}
+                <div class="post-box">
+                    <b>{{ post.title }}</b><br>
+                    <small>Team: {{ post.team.team_name }}</small><br>
+
+                    {% if post.content %}
+                    <p>{{ post.content }}</p>
+                    {% endif %}
+
+                    ❤️ {{ post.likes.count }} Likes
+                </div>
+                {% empty %}
+                <p>No posts yet</p>
+                {% endfor %}
+            </div>
+
+        
+            <div class="teams-section">
+                <h3>Your Teams</h3>
+                <hr>
+
+                {% for team in teams %}
+                <a href="{% url 'team_detail' team.team_id %}" style="text-decoration:none; color:white;">
+                    <div class="team-card">
+                        {{ team.team_name }}
+                    </div>
+                </a>
+                {% empty %}
+                <p>No teams joined</p>
+                {% endfor %}
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
