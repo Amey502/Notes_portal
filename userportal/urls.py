@@ -13,4 +13,5 @@ urlpatterns = [
     path('post/edit/<str:post_id>/', views.edit_post, name='edit_post'),
     path('search/team/', views.search_team, name='search_team'),
     path('profile/', views.profile, name='profile'),
+    path('post/summarize/<str:post_id>/', views.generate_summary, name='generate_summary'),
 ]

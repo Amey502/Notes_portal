@@ -89,7 +89,7 @@
 
 <body>
 
-  
+
     <div class="navbar">
         <div class="nav-left">
             <a href="{% url 'home' %}">Home</a>
@@ -168,6 +168,25 @@
                         <p>{{ post.content }}</p>
                         {% endif %}
 
+                        {% if post.summary %}
+                        <div style="
+    margin-top:10px;
+    padding:10px;
+    background: rgba(255,255,255,0.05);
+    border-radius:8px;
+    font-size:14px;
+    color:#ccc;
+">
+                            <b>AI Summary:</b><br>
+                            {{ post.summary }}
+                        </div>
+                        {% endif %}
+
+                        {% if not post.summary %}
+                        <a href="{% url 'generate_summary' post.post_id %}">
+                            ⚡ Generate Summary
+                        </a>
+                        {% endif %}
 
                         <a href="#"
                             onclick="toggleLike('{{ post.post_id }}', '{% url 'toggle_like' post.post_id %}'); return false;"

@@ -5,6 +5,7 @@ from django.contrib import messages
 from .models import Team, Post, Comment
 from django.db.models import Q
 from django.http import JsonResponse
+from .ai_utils import summarize_text, get_combined_text
 
 
 def logout_view(request):
@@ -42,26 +43,34 @@ def create_team(request):
     return redirect('home')
 
 @login_required
-@login_required
 def team_detail(request, team_id):
     team = Team.objects.get(team_id=team_id)
 
     query = request.GET.get('search')
-
-    posts = Post.objects.filter(team=team).order_by('-created_at')
 
     if request.method == "POST":
         title = request.POST.get("title")
         content = request.POST.get("content")
         pdf = request.FILES.get("pdf")
 
-        Post.objects.create(
+        post = Post.objects.create(
             team=team,
             user=request.user,
             title=title,
             content=content,
             pdf=pdf
         )
+
+        combined_text = get_combined_text(
+            content,
+            post.pdf.path if post.pdf else None
+        )
+
+        combined_text = combined_text[:5000]
+
+        if combined_text.strip():
+            post.summary = summarize_text(combined_text)
+            post.save()
 
         return redirect('team_detail', team_id=team_id)
 
@@ -176,3 +185,20 @@ def profile(request):
         "teams": teams,
         "posts": posts
     })
+
+@login_required
+def generate_summary(request, post_id):
+    post = Post.objects.get(post_id=post_id)
+
+    combined_text = get_combined_text(
+        post.content,
+        post.pdf.path if post.pdf else None
+    )
+
+    combined_text = combined_text[:5000]
+
+    if combined_text.strip():
+        post.summary = summarize_text(combined_text)
+        post.save()
+
+    return redirect('team_detail', team_id=post.team.team_id)
