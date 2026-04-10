@@ -149,6 +149,22 @@
                 </div>
                 {% endif %}
 
+
+                <div style="margin-bottom:15px;">
+                    <form method="GET">
+                        <select name="sort" onchange="this.form.submit()" style="
+            padding:6px 10px;
+            border-radius:6px;
+            border:none;
+        ">
+                            <option value="">Sort by Latest</option>
+                            <option value="likes" {% if request.GET.sort == "likes" %}selected{% endif %}>
+                                Sort by Likes
+                            </option>
+                        </select>
+                    </form>
+                </div>
+
                 {% if is_member %}
 
                 {% for post in posts %}
@@ -162,7 +178,10 @@
                         {% endif %}
 
                         <b>{{ post.title }}</b><br>
-                        <small>by {{ post.user.username }}</small><br>
+                        <small>
+                            by {{ post.user.username }} |
+                            {{ post.created_at|date:"d M Y, H:i" }}
+                        </small><br>
 
                         {% if post.content %}
                         <p>{{ post.content }}</p>
@@ -266,7 +285,22 @@
 
 
                 <div class="right-panel">
-                    <h3>Members</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h3 style="margin:0;">Members</h3>
+
+                        {% if is_member %}
+                        <a href="{% url 'leave_team' team.team_id %}"
+                            onclick="return confirm('Are you sure you want to leave this team?')" style="
+        padding:6px 12px;
+        background:#ff4d4d;
+        border-radius:6px;
+        color:white;
+        font-weight:bold;
+    ">
+                            Leave Team
+                        </a>
+                        {% endif %}
+                    </div>
                     <hr>
                     {% for m in members %}
                     <p>{{ m.username }}</p>
@@ -288,7 +322,7 @@
     z-index:999;
 "></div>
 
-        <!-- POPUP BOX -->
+
         <div id="popupForm" style="
     display:none;
     position:fixed;
@@ -303,7 +337,7 @@
     width:320px;
 ">
 
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" onsubmit="closeForm()">
                 {% csrf_token %}
 
                 <input type="text" name="title" placeholder="Title" required
@@ -316,15 +350,10 @@
 
                 <div style="display:flex; justify-content:space-between;">
 
-                    <button type="submit" style="
-                background: linear-gradient(135deg, #4facfe, #00f2fe);
-                color: white;
-                padding:8px 14px;
-                border:none;
-                border-radius:8px;
-                font-weight:bold;
-                cursor:pointer;
-            ">
+                    <button type="submit" onclick="
+    this.innerText='Posting...';
+    setTimeout(() => this.disabled=true, 100);
+">
                         Post
                     </button>
 

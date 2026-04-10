@@ -6,6 +6,7 @@ from .models import Team, Post, Comment
 from django.db.models import Q
 from django.http import JsonResponse
 from .ai_utils import summarize_text, get_combined_text
+from django.db import models
 
 
 def logout_view(request):
@@ -84,7 +85,17 @@ def team_detail(request, team_id):
             Q(user__username__icontains=query)
         )
 
-    posts = Post.objects.filter(team=team).order_by('-created_at')
+    # posts = Post.objects.filter(team=team).order_by('-created_at')
+
+    sort = request.GET.get('sort')
+
+    if sort == "likes":
+        posts = Post.objects.filter(team=team).annotate(
+            like_count=models.Count('likes')
+        ).order_by('-like_count', '-created_at')
+    else:
+        posts = Post.objects.filter(team=team).order_by('-created_at')
+
     is_member = request.user in team.members.all()
     members = team.members.all()
 
@@ -195,10 +206,19 @@ def generate_summary(request, post_id):
         post.pdf.path if post.pdf else None
     )
 
-    combined_text = combined_text[:5000]
+    combined_text = combined_text[:2000]
 
     if combined_text.strip():
         post.summary = summarize_text(combined_text)
         post.save()
 
     return redirect('team_detail', team_id=post.team.team_id)
+
+@login_required
+def leave_team(request, team_id):
+    team = Team.objects.get(team_id=team_id)
+
+    if request.user in team.members.all():
+        team.members.remove(request.user)
+
+    return redirect('home')  

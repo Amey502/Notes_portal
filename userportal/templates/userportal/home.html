@@ -186,18 +186,58 @@
 
     </div>
 
-
-    <div id="popupForm" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
-        background:white; padding:20px; border:2px solid black;">
+    <div id="popupForm" style="
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    background:#1e293b;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 0 20px rgba(0,0,0,0.6);
+    z-index:1000;
+    width:320px;
+">
 
         <form method="POST" action="{% url 'create_team' %}">
             {% csrf_token %}
 
-            <label>Team Name:</label><br>
-            <input type="text" name="team_name" required><br><br>
+            <input type="text" name="team_name" placeholder="Team Name" required style="
+                width:100%;
+                padding:10px;
+                border-radius:6px;
+                border:none;
+                outline:none;
+                margin-bottom:15px;
+            ">
 
-            <button type="submit">Create</button>
-            <button type="button" onclick="closeForm()">Cancel</button>
+            <div style="display:flex; justify-content:space-between;">
+
+                <button type="submit" style="
+                background: linear-gradient(135deg, #4facfe, #00f2fe);
+                color:white;
+                padding:8px 14px;
+                border:none;
+                border-radius:8px;
+                font-weight:bold;
+                cursor:pointer;
+            ">
+                    Create
+                </button>
+
+                <button type="button" onclick="closeForm()" style="
+                background:#6c757d;
+                color:white;
+                padding:8px 14px;
+                border:none;
+                border-radius:8px;
+                cursor:pointer;
+            ">
+                    Cancel
+                </button>
+
+            </div>
         </form>
 
     </div>
@@ -206,10 +246,12 @@
     <script>
         function openForm() {
             document.getElementById("popupForm").style.display = "block";
+            document.getElementById("overlay").style.display = "block";
         }
 
         function closeForm() {
             document.getElementById("popupForm").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
         }
     </script>
 

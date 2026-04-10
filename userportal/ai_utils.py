@@ -3,16 +3,21 @@ import fitz  # PyMuPDF
 import pytesseract
 from PIL import Image
 import io
+import torch
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\TesseractOCR\\tesseract.exe"
 
-MODEL_NAME = "facebook/bart-large-cnn"
-
+# MODEL_NAME = "facebook/bart-large-cnn"
+MODEL_NAME = "sshleifer/distilbart-cnn-12-6"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
+# model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME).to(device)
 
-
+model = AutoModelForSeq2SeqLM.from_pretrained(
+    MODEL_NAME,
+    use_safetensors=True
+).to(device)
 
 def clean_text(text):
     return " ".join(text.split())
@@ -40,14 +45,27 @@ def summarize_text(text):
             return_tensors="pt"
         )
 
-        summary_ids = model.generate(
-            inputs["input_ids"],
-            max_length=120,
-            min_length=30,
-            num_beams=4,
-            length_penalty=2.0,
-            early_stopping=True
-        )
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+
+        with torch.no_grad():
+            # summary_ids = model.generate(
+            #     inputs["input_ids"],
+            #     max_length=120,
+            #     min_length=30,
+            #     num_beams=4,
+            #     length_penalty=2.0,
+            #     early_stopping=True
+            # ) //facebook bart
+
+            summary_ids = model.generate(
+                inputs["input_ids"],
+                max_length=120,
+                min_length=30,
+                num_beams=6,
+                length_penalty=3.0,
+                no_repeat_ngram_size=3,
+                early_stopping=True
+            ) #distilbart
 
         summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
         final_summary += summary + " "
@@ -109,3 +127,4 @@ def get_combined_text(content, pdf_path=None):
         combined_text += " " + pdf_text
 
     return clean_text(combined_text)
+
