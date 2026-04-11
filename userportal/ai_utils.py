@@ -1,77 +1,113 @@
+
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import fitz  # PyMuPDF
 import pytesseract
 from PIL import Image
 import io
 import torch
+import re
+
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\TesseractOCR\\tesseract.exe"
 
-# MODEL_NAME = "facebook/bart-large-cnn"
-MODEL_NAME = "sshleifer/distilbart-cnn-12-6"
+
+MODEL_NAME = "facebook/bart-large-cnn"
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-# model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME).to(device)
-
-model = AutoModelForSeq2SeqLM.from_pretrained(
-    MODEL_NAME,
-    use_safetensors=True
-).to(device)
-
-def clean_text(text):
-    return " ".join(text.split())
+model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME).to(device)
 
 
-
-def chunk_text(text, max_words=400):
-    words = text.split()
-    return [" ".join(words[i:i+max_words]) for i in range(0, len(words), max_words)]
-
-
-
-def summarize_text(text):
+def preprocess_text(text):
     if not text:
         return ""
 
-    chunks = chunk_text(text)
-    final_summary = ""
+    text = text.replace("\n", " ")
+    text = text.replace("\t", " ")
 
+    
+    text = " ".join(text.split())
+
+    
+    text = re.sub(r'[^a-zA-Z0-9.,!?()\- ]+', ' ', text)
+
+    return text
+
+
+def split_into_sentences(text):
+    return re.split(r'(?<=[.!?]) +', text)
+
+
+def chunk_text_by_sentences(text, max_words=350):
+    sentences = split_into_sentences(text)
+
+    chunks = []
+    current_chunk = []
+    word_count = 0
+
+    for sentence in sentences:
+        words = sentence.split()
+
+        if word_count + len(words) > max_words:
+            chunks.append(" ".join(current_chunk))
+            current_chunk = []
+            word_count = 0
+
+        current_chunk.append(sentence)
+        word_count += len(words)
+
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+
+    return chunks
+
+
+def summarize_chunk(chunk):
+    inputs = tokenizer(
+        chunk,
+        max_length=1024,
+        truncation=True,
+        return_tensors="pt"
+    )
+
+    inputs = {k: v.to(device) for k, v in inputs.items()}
+
+    with torch.no_grad():
+        summary_ids = model.generate(
+        inputs["input_ids"],
+        max_length=250,
+        min_length=80,
+        num_beams=4,
+        repetition_penalty=1.3,
+        length_penalty=0.8,
+        early_stopping=True
+    )
+
+    return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+
+
+def summarize_text(text):
+    text = preprocess_text(text)
+
+
+    if len(text.split()) < 80:
+        return text
+
+    chunks = chunk_text_by_sentences(text)
+
+    chunk_summaries = []
     for chunk in chunks:
-        inputs = tokenizer(
-            chunk,
-            max_length=1024,
-            truncation=True,
-            return_tensors="pt"
-        )
+        if chunk.strip():
+            summary = summarize_chunk(chunk)
+            chunk_summaries.append(summary)
 
-        inputs = {k: v.to(device) for k, v in inputs.items()}
+    combined_summary = " ".join(chunk_summaries)
 
-        with torch.no_grad():
-            # summary_ids = model.generate(
-            #     inputs["input_ids"],
-            #     max_length=120,
-            #     min_length=30,
-            #     num_beams=4,
-            #     length_penalty=2.0,
-            #     early_stopping=True
-            # ) //facebook bart
+  
+    final_summary = summarize_chunk(combined_summary)
 
-            summary_ids = model.generate(
-                inputs["input_ids"],
-                max_length=120,
-                min_length=30,
-                num_beams=6,
-                length_penalty=3.0,
-                no_repeat_ngram_size=3,
-                early_stopping=True
-            ) #distilbart
-
-        summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
-        final_summary += summary + " "
-
-    return final_summary.strip()
-
+    return final_summary
 
 
 def extract_pdf_text(pdf_path):
@@ -80,10 +116,10 @@ def extract_pdf_text(pdf_path):
         doc = fitz.open(pdf_path)
         for page in doc:
             text += page.get_text()
-    except:
-        pass
-    return text
+    except Exception as e:
+        print("PDF extraction error:", e)
 
+    return text
 
 
 def is_scanned_pdf(pdf_path, threshold=0.2):
@@ -99,7 +135,6 @@ def is_scanned_pdf(pdf_path, threshold=0.2):
     return ratio < threshold
 
 
-
 def extract_text_with_ocr(pdf_path):
     text = ""
     doc = fitz.open(pdf_path)
@@ -109,14 +144,22 @@ def extract_text_with_ocr(pdf_path):
         img_bytes = pix.tobytes("png")
         image = Image.open(io.BytesIO(img_bytes))
 
-        text += pytesseract.image_to_string(image)
+        try:
+            osd = pytesseract.image_to_osd(image)
+            rotation = int(re.search(r'Rotate: (\d+)', osd).group(1))
+            if rotation != 0:
+                image = image.rotate(-rotation, expand=True)
+        except:
+            pass  
+
+       
+        text += pytesseract.image_to_string(image, config='--psm 6')
 
     return text
 
 
-
 def get_combined_text(content, pdf_path=None):
-    combined_text = content or ""
+    pdf_text = ""
 
     if pdf_path:
         if is_scanned_pdf(pdf_path):
@@ -124,7 +167,17 @@ def get_combined_text(content, pdf_path=None):
         else:
             pdf_text = extract_pdf_text(pdf_path)
 
-        combined_text += " " + pdf_text
 
-    return clean_text(combined_text)
+    print("PDF TEXT LENGTH:", len(pdf_text))
 
+
+    if pdf_text.strip():
+        combined_text = pdf_text
+    else:
+        combined_text = content or ""
+
+    combined_text = preprocess_text(combined_text)
+
+    print("TEXT SAMPLE:", combined_text[:300])
+
+    return combined_text
