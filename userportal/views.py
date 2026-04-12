@@ -7,6 +7,9 @@ from django.db.models import Q
 from django.http import JsonResponse
 from .ai_utils import summarize_text, get_combined_text
 from django.db import models
+import requests
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 def logout_view(request):
@@ -221,4 +224,49 @@ def leave_team(request, team_id):
     if request.user in team.members.all():
         team.members.remove(request.user)
 
-    return redirect('home')  
+    return redirect('home')
+
+@csrf_exempt
+@login_required
+def chatbot_ask(request, team_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        user_message = data.get("message", "")
+
+        team = Team.objects.get(team_id=team_id)
+
+        posts = Post.objects.filter(team=team).order_by('-created_at')[:3]
+
+        context_text = ""
+        for post in posts:
+            context_text += f"{post.title}\n{post.content}\n\n"
+
+        prompt = f"""
+You are a helpful study assistant.
+
+Context:
+{context_text}
+
+Question:
+{user_message}
+
+Answer clearly:
+"""
+
+        try:
+            response = requests.post(
+                "http://localhost:11434/api/generate",
+                json={
+                    "model": "llama3",
+                    "prompt": prompt,
+                    "stream": False
+                }
+            )
+
+            result = response.json()
+            answer = result.get("response", "No response")
+
+        except Exception as e:
+            answer = "Error connecting to AI"
+
+        return JsonResponse({"response": answer})  

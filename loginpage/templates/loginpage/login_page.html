@@ -5,99 +5,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
         body {
             margin: 0;
-            height: 100vh;
-            background: radial-gradient(circle at top left, #1e1e2f, #0f172a);
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            overflow-x: hidden;
         }
 
-        .login-container,
-        .register-container {
-            width: 340px;
-            padding: 35px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 0 25px rgba(0, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .login-container {
+            width: 380px;
+            padding: 40px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s ease;
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 25px;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 28px;
+            color: white;
             letter-spacing: 1px;
         }
 
         label {
-            font-size: 13px;
-            color: #cbd5e1;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
         }
 
         input {
             width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 18px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            background: rgba(255, 255, 255, 0.08);
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             color: white;
-            transition: 0.3s;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+            transition: border-color 0.3s, background 0.3s;
         }
 
         input:focus {
-            box-shadow: 0 0 10px #22d3ee;
-            background: rgba(255, 255, 255, 0.12);
+            border-color: #00f2fe;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
         }
 
-        button {
+        .btn-submit {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 8px;
-            background: linear-gradient(90deg, #22d3ee, #3b82f6);
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
             color: white;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 16px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            margin-bottom: 15px;
         }
 
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px #22d3ee;
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
         }
 
-        a button {
-            background: transparent;
-            border: 1px solid #22d3ee;
-            margin-top: 10px;
+        .btn-link {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            text-align: center;
+            box-sizing: border-box;
+            text-decoration: none;
         }
 
-        a button:hover {
-            background: rgba(34, 211, 238, 0.1);
+        .btn-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
-        p {
-            font-size: 13px;
-            color: #f87171;
+        .messages-alert {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 4px solid #ef4444;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
 
-        .login-container:hover,
-        .register-container:hover {
-            transform: translateY(-5px);
-            transition: 0.3s;
+        .messages-alert p {
+            color: #fca5a5;
+            margin: 0;
+            font-weight: 500;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -111,20 +142,24 @@
             {% csrf_token %}
 
             {% if messages %}
-            {% for m in messages %}
-            <p style="color: red;">{{ m }}</p>
-            {% endfor %}
+            <div class="messages-alert">
+                {% for m in messages %}
+                <p>{{ m }}</p>
+                {% endfor %}
+            </div>
             {% endif %}
 
             <label>Username : </label>
-            <input type="text" name="username"><br><br>
+            <input type="text" name="username">
 
             <label>Password : </label>
-            <input type="password" name="pwd"><br><br>
+            <input type="password" name="pwd">
 
-            <button type="submit">Submit</button>
+            <button type="submit" class="btn-submit">Submit</button>
 
-            <a href="{% url 'register' %}"><button type="button">Register</button></a>
+            <a href="{% url 'register' %}" style="text-decoration: none;">
+                <button type="button" class="btn-link">Register</button>
+            </a>
         </form>
     </div>
 

@@ -15,4 +15,5 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('post/summarize/<str:post_id>/', views.generate_summary, name='generate_summary'),
     path('team/leave/<str:team_id>/', views.leave_team, name='leave_team'),
+    path('chatbot/<str:team_id>/', views.chatbot_ask, name='chatbot_ask'),
 ]

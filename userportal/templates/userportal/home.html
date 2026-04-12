@@ -4,116 +4,283 @@
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
-            font-family: Arial;
+            font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #0f172a, #1e293b);
             color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 30px;
-
-            background: linear-gradient(135deg, #4facfe, #00f2fe, #a18cd1);
+            padding: 18px 50px;
+            background: linear-gradient(135deg, rgba(0, 114, 255, 0.4) 0%, rgba(255, 0, 128, 0.4) 100%);
+            backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .nav-left a,
         .nav-right a {
-            margin-right: 15px;
+            margin-right: 20px;
             text-decoration: none;
-            font-weight: bold;
-            color: white;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
         }
 
         .nav-left a:hover,
         .nav-right a:hover {
-            opacity: 0.8;
+            color: #00f2fe;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+            opacity: 1;
+        }
+
+        .nav-center form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 15px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-center form:focus-within {
+            border-color: #00f2fe;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
         }
 
         .nav-center input {
-            padding: 8px;
+            padding: 8px 0;
             width: 250px;
-            border-radius: 8px;
+            background: transparent;
             border: none;
             outline: none;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        .nav-center input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-center button {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-center button:hover {
+            transform: scale(1.2);
         }
 
         .container {
-            padding: 30px;
+            padding: 50px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .team-box {
-            padding: 20px;
+            padding: 30px;
             display: flex;
-            gap: 20px;
+            gap: 25px;
             flex-wrap: wrap;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
 
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
+        .team-link {
+            text-decoration: none;
+            color: white;
         }
 
         .team-card {
-            width: 160px;
-            height: 160px;
-            border-radius: 15px;
-
+            width: 170px;
+            height: 170px;
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-
-            font-weight: bold;
+            font-weight: 700;
             color: white;
-
-            background: rgba(255, 255, 255, 0.08);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-
-            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            padding: 15px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .team-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(79, 172, 254, 0.4);
+            border-color: rgba(79, 172, 254, 0.6);
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.2), rgba(0, 242, 254, 0.05));
         }
 
         .create-card {
-            width: 160px;
-            height: 160px;
-            border-radius: 15px;
-
+            width: 170px;
+            height: 170px;
+            border-radius: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-
             cursor: pointer;
-            color: white;
-
-            border: 2px dashed rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.05);
-
-            transition: 0.3s;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
         }
 
         .create-card:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: white;
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
         .empty {
             font-size: 18px;
-            color: #ccc;
+            color: #94a3b8;
+            width: 100%;
+            text-align: center;
+            padding: 40px 0;
+            font-weight: 300;
+        }
+
+        .messages-alert {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 4px solid #ef4444;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .messages-alert p {
+            color: #fca5a5;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        #popupForm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: #1e293b;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            width: 350px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes popIn {
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        #popupForm input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            outline: none;
+            margin-bottom: 25px;
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        #popupForm input[type="text"]:focus {
+            border-color: #00f2fe;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 
 <body>
-
 
     <div class="navbar">
         <div class="nav-left">
@@ -122,26 +289,9 @@
         </div>
 
         <div class="nav-center">
-            <form method="GET" action="{% url 'search_team' %}" style="display:flex; align-items:center; gap:8px;">
-
-                <input type="text" name="q" placeholder="Search teams" value="{{ request.GET.q }}" required style="
-                padding:8px 12px;
-                border-radius:20px;
-                border:none;
-                outline:none;
-                width:250px;
-            ">
-
-                <button type="submit" style="
-            border:none;
-            padding:8px 12px;
-            border-radius:50%;
-            cursor:pointer;
-            background:white;
-        ">
-                    🔍
-                </button>
-
+            <form method="GET" action="{% url 'search_team' %}">
+                <input type="text" name="q" placeholder="Search teams" value="{{ request.GET.q }}" required>
+                <button type="submit">🔍</button>
             </form>
         </div>
 
@@ -153,11 +303,12 @@
 
     <div class="container">
 
-
         {% if messages %}
-        {% for m in messages %}
-        <p style="color: red;">{{ m }}</p>
-        {% endfor %}
+        <div class="messages-alert">
+            {% for m in messages %}
+            <p>{{ m }}</p>
+            {% endfor %}
+        </div>
         {% endif %}
 
         <div class="team-box">
@@ -165,8 +316,7 @@
             {% if teams %}
             {% for team in teams %}
 
-
-            <a href="{% url 'team_detail' team.team_id %}" style="text-decoration:none; color:black;">
+            <a href="{% url 'team_detail' team.team_id %}" class="team-link">
                 <div class="team-card">
                     <b>{{ team.team_name }}</b>
                 </div>
@@ -177,7 +327,6 @@
             <p class="empty">No teams available</p>
             {% endif %}
 
-
             <div class="create-card" onclick="openForm()">
                 + Create Team
             </div>
@@ -186,62 +335,20 @@
 
     </div>
 
-    <div id="popupForm" style="
-    display:none;
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%, -50%);
-    background:#1e293b;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 0 20px rgba(0,0,0,0.6);
-    z-index:1000;
-    width:320px;
-">
+    <div id="overlay"></div>
 
+    <div id="popupForm">
         <form method="POST" action="{% url 'create_team' %}">
             {% csrf_token %}
 
-            <input type="text" name="team_name" placeholder="Team Name" required style="
-                width:100%;
-                padding:10px;
-                border-radius:6px;
-                border:none;
-                outline:none;
-                margin-bottom:15px;
-            ">
+            <input type="text" name="team_name" placeholder="Team Name" required>
 
             <div style="display:flex; justify-content:space-between;">
-
-                <button type="submit" style="
-                background: linear-gradient(135deg, #4facfe, #00f2fe);
-                color:white;
-                padding:8px 14px;
-                border:none;
-                border-radius:8px;
-                font-weight:bold;
-                cursor:pointer;
-            ">
-                    Create
-                </button>
-
-                <button type="button" onclick="closeForm()" style="
-                background:#6c757d;
-                color:white;
-                padding:8px 14px;
-                border:none;
-                border-radius:8px;
-                cursor:pointer;
-            ">
-                    Cancel
-                </button>
-
+                <button type="submit" class="btn-submit">Create</button>
+                <button type="button" class="btn-cancel" onclick="closeForm()">Cancel</button>
             </div>
         </form>
-
     </div>
-
 
     <script>
         function openForm() {

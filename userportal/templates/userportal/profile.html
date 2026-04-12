@@ -1,77 +1,279 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Profile</title>
-
+    <meta charset="UTF-8">
+    <title>Profile - {{ user.username }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4facfe;
+            --secondary: #00f2fe;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-light: rgba(255, 255, 255, 0.08);
+            --text-main: rgba(255, 255, 255, 0.95);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --shadow-soft: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
         body {
             margin: 0;
-            font-family: Arial;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: white;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+            overflow-x: hidden;
         }
+
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: -1;
+            pointer-events: none;
+            animation: float 20s ease-in-out infinite alternate;
+        }
+        body::before {
+            width: 500px;
+            height: 500px;
+            background: rgba(79, 172, 254, 0.15);
+            top: -150px;
+            left: -100px;
+        }
+        body::after {
+            width: 400px;
+            height: 400px;
+            background: rgba(0, 242, 254, 0.12);
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #4facfe, #00f2fe, #a18cd1);
+            padding: 18px 50px;
+            background: linear-gradient(135deg, rgba(0, 114, 255, 0.4) 0%, rgba(255, 0, 128, 0.4) 100%);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .nav-left a,
-        .nav-right a {
-            margin-right: 15px;
+        .nav-left a, .nav-right a {
+            margin-right: 25px;
             text-decoration: none;
-            font-weight: bold;
-            color: white;
+            font-weight: 500;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .nav-left a:hover, .nav-right a:hover {
+            color: #fff;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+        }
+        
+        .nav-left a::after, .nav-right a::after {
+            content: '';
+            position: absolute;
+            width: 0%;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+        .nav-left a:hover::after, .nav-right a:hover::after {
+            width: 100%;
         }
 
         .container {
-            padding: 30px;
+            padding: 60px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-weight: 700;
+            font-size: 36px;
+            margin-bottom: 40px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h3 {
+            font-weight: 600;
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: var(--secondary);
+            letter-spacing: 0.5px;
         }
 
         .main-layout {
             display: flex;
-            gap: 20px;
+            gap: 40px;
+            flex-wrap: wrap;
         }
 
         .posts-section {
             flex: 3;
-            padding: 20px;
-            border-radius: 15px;
-            background: rgba(255,255,255,0.05);
-            max-height: 500px;
+            min-width: 320px;
+            padding: 35px;
+            border-radius: 24px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            max-height: 650px;
             overflow-y: auto;
+            box-shadow: var(--shadow-soft);
         }
 
         .teams-section {
             flex: 1;
-            padding: 20px;
-            border-radius: 15px;
-            background: rgba(255,255,255,0.08);
+            min-width: 280px;
+            padding: 35px;
+            border-radius: 24px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+            align-self: flex-start;
+        }
+
+        .teams-section hr {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            margin-bottom: 25px;
         }
 
         .post-box {
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.08);
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+
+        .post-box:hover::before {
+            transform: translateX(100%);
+        }
+
+        .post-box:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            border-color: rgba(79, 172, 254, 0.4);
+            background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+        }
+
+        .post-box b {
+            font-size: 19px;
+            color: #fff;
+            letter-spacing: 0.3px;
+        }
+
+        .post-box small {
+            color: var(--text-muted);
+            display: inline-block;
+            margin-top: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .post-box p {
+            line-height: 1.7;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+        
+        .like-text {
+            font-size: 14px;
+            color: #ff4d6d;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(255, 77, 109, 0.1);
+            border-radius: 8px;
         }
 
         .team-card {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.1);
+            padding: 18px;
+            margin-bottom: 16px;
+            border-radius: 14px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.05);
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        .post-box:hover,
+        .team-link {
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+
         .team-card:hover {
-            transform: scale(1.02);
+            transform: translateY(-4px) scale(1.02);
+            background: linear-gradient(145deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.05));
+            border-color: rgba(79, 172, 254, 0.5);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.2);
+            color: #fff;
+        }
+        
+        .empty-state {
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
@@ -95,7 +297,6 @@
 
         <div class="main-layout">
 
-          
             <div class="posts-section">
                 <h3>Your Posts</h3>
 
@@ -108,26 +309,25 @@
                     <p>{{ post.content }}</p>
                     {% endif %}
 
-                    ❤️ {{ post.likes.count }} Likes
+                    <div class="like-text">❤️ {{ post.likes.count }} Likes</div>
                 </div>
                 {% empty %}
-                <p>No posts yet</p>
+                <p class="empty-state">No posts yet</p>
                 {% endfor %}
             </div>
 
-        
             <div class="teams-section">
                 <h3>Your Teams</h3>
                 <hr>
 
                 {% for team in teams %}
-                <a href="{% url 'team_detail' team.team_id %}" style="text-decoration:none; color:white;">
+                <a href="{% url 'team_detail' team.team_id %}" class="team-link">
                     <div class="team-card">
                         {{ team.team_name }}
                     </div>
                 </a>
                 {% empty %}
-                <p>No teams joined</p>
+                <p class="empty-state">No teams joined</p>
                 {% endfor %}
             </div>
 
