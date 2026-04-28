@@ -1,0 +1,9 @@
+django
+numpy
+pandas
+transformers
+torch
+pymupdf
+pytesseract
+pillow
+requests
