@@ -1,4 +1,4 @@
-# Notes Sharing Portal with build in AI-Summarizers and Chatbot
+# Notes Sharing Portal with built in AI-Summarizers and Chatbot
 
 ## Overview
 
