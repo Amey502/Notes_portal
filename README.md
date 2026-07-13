@@ -1,4 +1,4 @@
-# Notes Sharing Portal with built in AI-Summarizers and Chatbot
+# IntelliNotes
 
 ## Overview
 
